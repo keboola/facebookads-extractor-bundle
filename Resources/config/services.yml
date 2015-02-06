@@ -1,0 +1,13 @@
+services:
+    ex_fb_ads.job_executor:
+        class: Keboola\FacebookAdsExtractorBundle\Job\Executor
+        arguments: ['@keboola_extractor.configuration', '@ex_fb_ads.extractor', '@logger', '@syrup.temp', '@syrup.encryptor']
+    ex_fb_ads.extractor:
+        class: Keboola\FacebookAdsExtractorBundle\FacebookAdsExtractor
+        arguments: ['%fb-ads%']
+    keboola_extractor.configuration:
+        class: Keboola\ExtractorBundle\Config\Configuration
+        arguments: ['%app_name%', '@syrup.temp', '%required_attributes%']
+parameters:
+    required_attributes: null
+    job_config_fields: null
