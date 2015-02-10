@@ -75,8 +75,9 @@ class OAuthController extends OAuth20Controller
 		} catch (ClientException $e) {
 			$errCode = $e->getResponse()->getStatusCode();
 			if ($errCode == 400) {
-				$desc = json_decode($e->getResponse()->getBody(true), true);
-				throw new UserException("OAuth authentication failed[{$desc["code"]}]: {$desc["error_message"]}");
+// 				$desc = json_decode($e->getResponse()->getBody(true), true);
+// 				throw new UserException("OAuth authentication failed[{$desc["code"]}]: {$desc["error_message"]}");
+				throw new UserException("OAuth authentication failed.", $e, ['message' => (string) $e->getResponse()->getBody(true)]);
 			} else {
 				throw $e;
 			}
