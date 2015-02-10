@@ -10,6 +10,7 @@ use	GuzzleHttp\Client as GuzzleClient,
 	GuzzleHttp\Exception\ClientException;
 use	Keboola\Utils\Utils;
 use Keboola\ExtractorBundle\Controller\OAuth20Controller;
+use	Keboola\StorageApi\ClientException;
 
 class OAuthController extends OAuth20Controller
 {
@@ -108,5 +109,39 @@ class OAuthController extends OAuth20Controller
 			$result[$pair[0]] = $pair[1];
 		}
 		return $result;
+	}
+
+	/**
+	 * Handle saving data returned from the OAuth process to StorageApi
+	 * By default, all response data is saved as oauth.{key}:{value} pairs
+	 * Override this to change which attributes to save, which to set protected etc..
+	 * @param \stdClass $data Data from the OAuth response
+	 * @return void
+	 * @todo workaround for the oauth.XX, respectively required_attributes not being handled with '.'
+	 */
+	protected function storeOAuthData($data)
+	{
+		$storageApi = $this->getStorageApi();
+
+		$tableId = "sys.c-{$this->appName}." . $this->sessionBag->get("config");
+		try {
+			if (!$storageApi->tableExists($tableId)) {
+				throw new UserException(sprintf("Configuration %s doesn't exist!", $this->sessionBag->get("config")));
+			}
+
+			foreach($data as $key => $value) {
+				// Try to guess whether to save the attribute as protected or not, by looking for "token" in its name
+				$protected = (strpos($key, "token") === false) ? false : true;
+
+				$storageApi->setTableAttribute(
+					$tableId,
+					$key,
+					$value,
+					$protected
+				);
+			}
+		} catch(ClientException $e) {
+			throw new UserException("Saving OAuth information to SAPI failed: " . $e->getMessage(), $e);
+		}
 	}
 }
