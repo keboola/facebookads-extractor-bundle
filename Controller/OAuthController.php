@@ -81,46 +81,7 @@ class OAuthController extends OAuth20Controller
 			}
 		}
 
-//     /oauth/access_token?
-//     grant_type=fb_exchange_token&
-//     client_id={app-id}&
-//     client_secret={app-secret}&
-//     fb_exchange_token={short-lived-token}
-// echo sprintf(
-// 				"https://graph.facebook.com/oauth/access_token?client_id=%s&redirect_uri=%s&client_secret=%s&grant_type=fb_exchange_token&fb_exchange_token=%s",
-// 				$this->getClientId(),
-// 				$this->getCallbackUrl($request),
-// 				$this->getClientSecret(),
-// 				$this->parseTokenResponse($SLresponse->getBody(true))["access_token"]
-// 			); die();
-// 			$response = $guzzle->get(sprintf(
-// 				"https://graph.facebook.com/oauth/access_token?client_id=%s&redirect_uri=%s&client_secret=%s&grant_type=fb_exchange_token&fb_exchange_token=%s",
-// 				$this->getClientId(),
-// 				$this->getCallbackUrl($request),
-// 				$this->getClientSecret(),
-// 				$this->parseTokenResponse($SLresponse->getBody(true))["access_token"]
-// 			));
-
-// 		try {
-// 			$response = $guzzle->get(sprintf(
-// 				"https://graph.facebook.com/oauth/access_token?client_id=%s&client_secret=%s&grant_type=fb_exchange_token&fb_exchange_token=%s",
-// 				$this->getClientId(),
-// 				$this->getClientSecret(),
-// 				$this->parseTokenResponse($SLresponse->getBody(true))["access_token"]
-// 			));
-// 		} catch (ClientException $e) {
-// 			$errCode = $e->getResponse()->getStatusCode();
-// 			if ($errCode == 400) {
-// 				$desc = json_decode($e->getResponse()->getBody(true), true);
-// 				throw new UserException("OAuth authentication failed[{$desc["code"]}]: {$desc["error_message"]}");
-// 			} else {
-// 				throw $e;
-// 			}
-// 		}
-//
-
 		$responseData = $this->parseTokenResponse($response->getBody(true));
-var_dump($responseData);die();
 
 		$this->storeOAuthData($responseData);
 		return $this->returnResult($responseData);
