@@ -10,7 +10,7 @@ use	GuzzleHttp\Client as GuzzleClient,
 	GuzzleHttp\Exception\ClientException;
 use	Keboola\Utils\Utils;
 use Keboola\ExtractorBundle\Controller\OAuth20Controller;
-use	Keboola\StorageApi\ClientException;
+use	Keboola\StorageApi\ClientException as SapiClientException;
 
 class OAuthController extends OAuth20Controller
 {
@@ -140,7 +140,7 @@ class OAuthController extends OAuth20Controller
 					$protected
 				);
 			}
-		} catch(ClientException $e) {
+		} catch(SapiClientException $e) {
 			throw new UserException("Saving OAuth information to SAPI failed: " . $e->getMessage(), $e);
 		}
 	}
