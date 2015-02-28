@@ -44,7 +44,6 @@ class OAuthController extends OAuth20Controller
 	 */
 	protected function getOAuthUrl($redirUrl, $clientId, $hash)
 	{
-		// return "https://api.example.com/oauth/authorize/?client_id={$clientId}&redirect_uri={$redirUrl}&response_type=code&state={$hash}";
 		return "https://www.facebook.com/dialog/oauth?client_id={$clientId}&redirect_uri={$redirUrl}&scope=ads_management,manage_pages,publish_actions&state={$hash}";
 	}
 

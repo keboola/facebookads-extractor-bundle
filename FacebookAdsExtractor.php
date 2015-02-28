@@ -21,7 +21,7 @@ class FacebookAdsExtractor extends JsonExtractor
 				]
 			]
 		);
-		$client->getEmitter()->attach($this->getBackoff());
+		$client->getEmitter()->attach($this->getBackoff(12, [500, 503, 504, 408, 420, 429, 400]));
 
 		$parser = $this->getParser($config);
 

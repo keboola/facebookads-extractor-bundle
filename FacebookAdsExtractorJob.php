@@ -2,11 +2,11 @@
 
 namespace Keboola\FacebookAdsExtractorBundle;
 
-use Keboola\ExtractorBundle\Extractor\Jobs\JsonJob;
+use Keboola\ExtractorBundle\Extractor\Jobs\JsonRecursiveJob;
 use	Keboola\Utils\Utils;
 use Syrup\ComponentBundle\Exception\SyrupComponentException;
 
-class FacebookAdsExtractorJob extends JsonJob
+class FacebookAdsExtractorJob extends JsonRecursiveJob
 {
 	protected $configName;
 
@@ -38,5 +38,20 @@ class FacebookAdsExtractorJob extends JsonJob
 		}
 
 		return $this->client->createRequest("GET", $response->paging->next);
+	}
+
+	/**
+	 * Workaround for /stats results
+	 * @param mixed $response
+	 * @param array|string $parentId ID (or list thereof) to be passed to parser
+	 * @return array The data containing array part of response
+	 */
+	protected function parse($response, $parentId = null)
+	{
+		if (substr(trim($this->config["endpoint"], "/"), 0, 5) == 'stats') {
+			$response = (array) $response;
+		}
+
+		parent::parse($response, $parentId);
 	}
 }
