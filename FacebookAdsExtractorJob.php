@@ -2,11 +2,13 @@
 
 namespace Keboola\FacebookAdsExtractorBundle;
 
-use Keboola\ExtractorBundle\Extractor\Jobs\JsonRecursiveJob,
+use	Keboola\ExtractorBundle\Extractor\Jobs\JsonRecursiveJob,
 	Keboola\ExtractorBundle\Common\Logger;
 use	Keboola\Utils\Utils;
-use Syrup\ComponentBundle\Exception\SyrupComponentException,
+use	Syrup\ComponentBundle\Exception\SyrupComponentException,
 	Syrup\ComponentBundle\Exception\UserException;
+use	Keboola\Code\Builder,
+	Keboola\Code\Exception\UserScriptException;
 
 class FacebookAdsExtractorJob extends JsonRecursiveJob
 {
@@ -17,14 +19,31 @@ class FacebookAdsExtractorJob extends JsonRecursiveJob
 	protected $datePeriods = null;
 
 	/**
+	 * @var Builder
+	 */
+	protected $stringBuilder;
+
+	/**
 	 * @brief Return a download request
 	 *
 	 * @return \Keboola\ExtractorBundle\Client\SoapRequest | \GuzzleHttp\Message\Request
 	 */
 	protected function firstPage()
 	{
-		$params = Utils::json_decode($this->config["params"], true);
-		// TODO functions
+		$params = (array) Utils::json_decode($this->config["params"]);
+
+		if (!empty($params)) {
+			try {
+				foreach($params as $key => &$value) {
+					if (is_object($value)) {
+						$value = $this->stringBuilder->run($value, ['metadata' => $this->configMetadata]);
+					}
+					unset($value);
+				}
+			} catch(UserScriptException $e) {
+				throw new UserException("User function failed: " . $e->getMessage());
+			}
+		}
 
 		if (!empty($params['slice_by'])) {
 			if ($this->datePeriods === null) {
@@ -127,5 +146,18 @@ class FacebookAdsExtractorJob extends JsonRecursiveJob
 		}
 
 		parent::parse($response, $parentId);
+	}
+
+	public function setConfigMetadata(array $data)
+	{
+		$this->configMetadata = $data;
+	}
+
+	/**
+	 * @param Builder $builder
+	 */
+	public function setBuilder(Builder $builder)
+	{
+		$this->stringBuilder = $builder;
 	}
 }

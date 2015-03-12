@@ -1335,12 +1335,12 @@
             "source": {
                 "type": "git",
                 "url": "https://bitbucket.org/keboola/extractor-bundle.git",
-                "reference": "52b17daaac70bb7c6be17cbd625b722ecdf478ec"
+                "reference": "392702da72621d53acc5e2a63e6716fe3970f532"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://bitbucket.org/keboola/extractor-bundle/get/52b17daaac70bb7c6be17cbd625b722ecdf478ec.zip",
-                "reference": "52b17daaac70bb7c6be17cbd625b722ecdf478ec",
+                "url": "https://bitbucket.org/keboola/extractor-bundle/get/392702da72621d53acc5e2a63e6716fe3970f532.zip",
+                "reference": "392702da72621d53acc5e2a63e6716fe3970f532",
                 "shasum": ""
             },
             "require": {
@@ -1375,7 +1375,7 @@
                 "keboola",
                 "syrup"
             ],
-            "time": "2015-02-28 01:31:05"
+            "time": "2015-03-10 11:40:02"
         },
         {
             "name": "keboola/json-parser",

@@ -2,11 +2,12 @@
 
 namespace Keboola\FacebookAdsExtractorBundle;
 
-use Keboola\ExtractorBundle\Extractor\Extractors\JsonExtractor,
+use	Keboola\ExtractorBundle\Extractor\Extractors\JsonExtractor,
 	Keboola\ExtractorBundle\Config\Config;
-use Syrup\ComponentBundle\Exception\SyrupComponentException;
-use GuzzleHttp\Client as Client;
-use Keboola\FacebookAdsExtractorBundle\FacebookAdsExtractorJob;
+use	Syrup\ComponentBundle\Exception\SyrupComponentException;
+use	GuzzleHttp\Client as Client;
+use	Keboola\FacebookAdsExtractorBundle\FacebookAdsExtractorJob;
+use	Keboola\Code\Builder;
 
 class FacebookAdsExtractor extends JsonExtractor
 {
@@ -24,10 +25,21 @@ class FacebookAdsExtractor extends JsonExtractor
 		$client->getEmitter()->attach($this->getBackoff(12, [500, 503, 504, 408, 420, 429, 400]));
 
 		$parser = $this->getParser($config);
+		$builder = new Builder();
 
 		foreach($config->getJobs() as $jobConfig) {
+			$this->metadata['jobs.lastStart.' . $jobConfig->getJobId()] =
+				empty($this->metadata['jobs.lastStart.' . $jobConfig->getJobId()])
+					? 0
+					: $this->metadata['jobs.lastStart.' . $jobConfig->getJobId()];
+			$this->metadata['jobs.start.' . $jobConfig->getJobId()] = time();
+
 			$job = new FacebookAdsExtractorJob($jobConfig, $client, $parser);
+			$job->setConfigMetadata($this->metadata);
+			$job->setBuilder($builder);
 			$job->run();
+
+			$this->metadata['jobs.lastStart.' . $jobConfig->getJobId()] = $this->metadata['jobs.start.' . $jobConfig->getJobId()];
 		}
 
 		$this->updateParserMetadata($parser);
