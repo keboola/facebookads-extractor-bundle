@@ -13,6 +13,12 @@ use	Keboola\Code\Builder,
 class FacebookAdsExtractorJob extends JsonRecursiveJob
 {
 	protected $configName;
+
+	/**
+	 * @var array
+	 */
+	protected $configMetadata;
+
 	/**
 	 * @var array
 	 */
@@ -88,12 +94,16 @@ class FacebookAdsExtractorJob extends JsonRecursiveJob
 		return $currentPeriod;
 	}
 
+	/**
+	 * @param array $params
+	 * @return array Date ranges for each call
+	 */
 	protected function createSlicedParams(array $params)
 	{
 		if (!isset($params['start_time'])) {
 			Logger::log('warning', "'start_time' is not defined while trying to slice by {$params['slice_by']}");
-			return false;
-		} elseif (!is_int($params['start_time'])) {
+			return [];
+		} elseif (!is_numeric($params['start_time'])) {
 			$startTime = strtotime($params['start_time']);
 			if ($startTime === false) {
 				throw new UserException("Failed parsing start_time ({$params['start_time']}) to a time string!");
@@ -113,6 +123,8 @@ class FacebookAdsExtractorJob extends JsonRecursiveJob
 				$multiplier = 60*60*24;
 				break;
 			case 'week':
+			case '7days':
+			case '7 days':
 				$multiplier = 60*60*24*7;
 				break;
 			default:
@@ -120,15 +132,27 @@ class FacebookAdsExtractorJob extends JsonRecursiveJob
 				break;
 		}
 
-		$currentStart = $startTime;
-		do {
-			$currentEnd = $currentStart + $multiplier;
-			$parts[] = [
-				'start_time' => date(DATE_ISO8601, $currentStart),
-				'end_time' => date(DATE_ISO8601, $currentEnd)
-			];
-			$currentStart = $currentEnd;
-		} while($currentEnd < $endTime);
+		if (empty($params['running_totals'])) {
+			$currentStart = $startTime;
+			do {
+				$currentEnd = $currentStart + $multiplier;
+				$parts[] = [
+					'start_time' => date(DATE_ISO8601, $currentStart),
+					'end_time' => date(DATE_ISO8601, ($currentEnd < $endTime) ? $currentEnd : $endTime)
+				];
+				$currentStart = $currentEnd;
+			} while($currentEnd < $endTime);
+		} else {
+			do {
+				$currentEnd = (empty($currentEnd) ? $startTime : $currentEnd) + $multiplier;
+				$parts[] = [
+					'start_time' => $startTime,
+					'end_time' => date(DATE_ISO8601, ($currentEnd < $endTime) ? $currentEnd : $endTime)
+				];
+				$currentStart = $currentEnd;
+			} while($currentEnd < $endTime);
+
+		}
 
 		return $parts;
 	}
