@@ -58,7 +58,7 @@ class FacebookAdsExtractorJob extends JsonRecursiveJob
 			}
 
 			$params = array_replace($params, $this->getNextDatePeriod());
-			unset($params['slice_by']);
+			unset($params['slice_by'], $params['running_totals'], $params['sliding_window']);
 		}
 
 		$url = Utils::buildUrl(trim($this->config["endpoint"], "/"), $params);
@@ -95,6 +95,7 @@ class FacebookAdsExtractorJob extends JsonRecursiveJob
 	}
 
 	/**
+	 * @todo It has a flaw, the slice_by check should be here and not in the firstPage()
 	 * @param array $params
 	 * @return array Date ranges for each call
 	 */
@@ -134,11 +135,18 @@ class FacebookAdsExtractorJob extends JsonRecursiveJob
 
 		if (empty($params['running_totals'])) {
 			$currentStart = $startTime;
+
 			do {
 				$currentEnd = $currentStart + $multiplier;
 				$parts[] = [
-					'start_time' => date(DATE_ISO8601, $currentStart),
-					'end_time' => date(DATE_ISO8601, ($currentEnd < $endTime) ? $currentEnd : $endTime)
+					'start_time' => date(
+						DATE_ISO8601,
+						empty($params['sliding_window']) ? $currentStart : ($currentEnd - $this->getTimeWindow($params['sliding_window']))
+					),
+					'end_time' => date(
+						DATE_ISO8601,
+						($currentEnd < $endTime) ? $currentEnd : $endTime
+					)
 				];
 				$currentStart = $currentEnd;
 			} while($currentEnd < $endTime);
@@ -146,15 +154,32 @@ class FacebookAdsExtractorJob extends JsonRecursiveJob
 			do {
 				$currentEnd = (empty($currentEnd) ? $startTime : $currentEnd) + $multiplier;
 				$parts[] = [
-					'start_time' => $startTime,
-					'end_time' => date(DATE_ISO8601, ($currentEnd < $endTime) ? $currentEnd : $endTime)
+					'start_time' => date(
+						DATE_ISO8601,
+						$startTime
+					),
+					'end_time' => date(
+						DATE_ISO8601,
+						($currentEnd < $endTime) ? $currentEnd : $endTime
+					)
 				];
 				$currentStart = $currentEnd;
 			} while($currentEnd < $endTime);
-
 		}
 
+		Logger::log("info", "Exporting data sliced into " . count($parts) . " parts.", ['parts' => $parts]);
 		return $parts;
+	}
+
+	protected function getTimeWindow($timeFrameString)
+	{
+		$timeFrame = strtotime($timeFrameString, 0);
+		if (empty($timeFrame)) {
+			throw new UserException(
+				"'sliding_window' parameter must be a strtotime compatible string (eg: '7 days'). '{$timeFrameString}' parsing failed."
+			);
+		}
+		return $timeFrame;
 	}
 
 	/**
