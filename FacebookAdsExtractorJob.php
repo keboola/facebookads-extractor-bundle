@@ -30,6 +30,16 @@ class FacebookAdsExtractorJob extends JsonRecursiveJob
 	protected $stringBuilder;
 
 	/**
+	 * @var string
+	 */
+	protected $minStartDate;
+
+	/**
+	 * @var int
+	 */
+	protected $maxSlices;
+
+	/**
 	 * @brief Return a download request
 	 *
 	 * @return \Keboola\ExtractorBundle\Client\SoapRequest | \GuzzleHttp\Message\Request
@@ -113,6 +123,11 @@ class FacebookAdsExtractorJob extends JsonRecursiveJob
 			$startTime = $params['start_time'];
 		}
 
+		if ($startTime < $this->minStartDate) {
+			Logger::log('warning', "Start time '{$startTime}' is set before Facebook went public on '{$this->minStartDate}'. Using '{$this->minStartDate}' as the start time.");
+			$this->startTime = $this->minStartDate;
+		}
+
 		if (empty($params['end_time'])) {
 			$endTime = time();
 		} else {
@@ -167,6 +182,10 @@ class FacebookAdsExtractorJob extends JsonRecursiveJob
 			} while($currentEnd < $endTime);
 		}
 
+		if (count($parts) > $this->maxSlices) {
+			throw new UserException("Attempted to export data sliced into more than '{$this->maxSlices}' parts.");
+		}
+
 		Logger::log("info", "Exporting data sliced into " . count($parts) . " parts.", ['parts' => $parts]);
 		return $parts;
 	}
@@ -208,5 +227,21 @@ class FacebookAdsExtractorJob extends JsonRecursiveJob
 	public function setBuilder(Builder $builder)
 	{
 		$this->stringBuilder = $builder;
+	}
+
+	/**
+	 * @param string|long $date
+	 */
+	public function setMinStartDate($date)
+	{
+		$this->minStartDate = is_numeric($date) ? $date : strtotime($date);
+	}
+
+	/**
+	 * @param int $i
+	 */
+	public function setMaxSlices($i)
+	{
+		$this->maxSlices = $i;
 	}
 }

@@ -13,6 +13,22 @@ class FacebookAdsExtractor extends JsonExtractor
 {
 	protected $name = 'fb-ads';
 
+	/**
+	 * @var string
+	 */
+	protected $minStartDate;
+
+	/**
+	 * @var int
+	 */
+	protected $maxSlices;
+
+	public function __construct($minStartDate, $maxSlices)
+	{
+		$this->minStartDate = $minStartDate;
+		$this->maxSlices = $maxSlices;
+	}
+
 	public function run(Config $config) {
 		$client = new Client(
 			[
@@ -37,6 +53,8 @@ class FacebookAdsExtractor extends JsonExtractor
 			$job = new FacebookAdsExtractorJob($jobConfig, $client, $parser);
 			$job->setConfigMetadata($this->metadata);
 			$job->setBuilder($builder);
+			$job->setMinStartDate($this->minStartDate);
+			$job->setMaxSlices($this->maxSlices);
 			$job->run();
 
 			$this->metadata['jobs.lastStart.' . $jobConfig->getJobId()] = $this->metadata['jobs.start.' . $jobConfig->getJobId()];
