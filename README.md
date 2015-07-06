@@ -3,6 +3,7 @@ HOST: https://syrup.keboola.com/ex-fb-ads
 
 # Facebook Ads Extractor configuration
 ---
+Uses [Ads Insights API v2.3](https://developers.facebook.com/docs/marketing-api/insights/v2.3)
 
 # Authentication
 POST/GET on /oauth endpoint
