@@ -32,7 +32,7 @@ class FacebookAdsExtractor extends JsonExtractor
 	public function run(Config $config) {
 		$client = new Client(
 			[
-				'base_url' => 'https://graph.facebook.com/v2.3/',
+				'base_url' => 'https://graph.facebook.com/v2.4/',
 				'defaults' => [
 					'query' => ['access_token' => $config->getAttributes()['access_token']]
 				]
