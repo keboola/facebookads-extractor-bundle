@@ -4,7 +4,8 @@ namespace Keboola\FacebookAdsExtractorBundle;
 
 use	Keboola\ExtractorBundle\Extractor\Jobs\JsonRecursiveJob,
 	Keboola\ExtractorBundle\Common\Logger;
-use	Keboola\Utils\Utils;
+use	Keboola\Utils\Utils,
+	Keboola\Utils\Exception\JsonDecodeException;
 use	Syrup\ComponentBundle\Exception\SyrupComponentException,
 	Syrup\ComponentBundle\Exception\UserException;
 use	Keboola\Code\Builder,
@@ -46,7 +47,11 @@ class FacebookAdsExtractorJob extends JsonRecursiveJob
 	 */
 	protected function firstPage()
 	{
-		$params = (array) Utils::json_decode($this->config["params"]);
+		try {
+			$params = (array) Utils::json_decode($this->config["params"]);
+		} catch(JsonDecodeException $e) {
+			throw new UserException("Error decoding 'params' JSON: " . $e->getMessage());
+		}
 
 		if (!empty($params)) {
 			try {
