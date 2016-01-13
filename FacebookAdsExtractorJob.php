@@ -249,4 +249,18 @@ class FacebookAdsExtractorJob extends JsonRecursiveJob
 	{
 		$this->maxSlices = $i;
 	}
+
+	public function download($request, $format = self::JSON)
+	{
+        try {
+            parent::download($request, $format);
+        } catch(UserException $e) {
+            if (empty($e->getData()['body']['error']['message'])) {
+                throw $e;
+            }
+
+            $message = $e->getData()['body']['error']['message'];
+            throw new UserException($message, $e, $e->getData());
+        }
+	}
 }
