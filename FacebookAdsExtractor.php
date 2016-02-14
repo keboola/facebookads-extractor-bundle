@@ -30,9 +30,13 @@ class FacebookAdsExtractor extends JsonExtractor
 	}
 
 	public function run(Config $config) {
+		$apiVersion = isset($config->getAttributes()['api_version'])
+			? $config->getAttributes()['api_version']
+			: 'v2.4';
+
 		$client = new Client(
 			[
-				'base_url' => 'https://graph.facebook.com/v2.4/',
+				'base_url' => "https://graph.facebook.com/{$apiVersion}/",
 				'defaults' => [
 					'query' => ['access_token' => $config->getAttributes()['access_token']]
 				]
