@@ -4,7 +4,8 @@ namespace Keboola\FacebookAdsExtractorBundle;
 
 use	Keboola\ExtractorBundle\Extractor\Extractors\JsonExtractor,
 	Keboola\ExtractorBundle\Config\Config;
-use	Syrup\ComponentBundle\Exception\SyrupComponentException;
+use	Syrup\ComponentBundle\Exception\SyrupComponentException,
+    Syrup\ComponentBundle\Exception\UserException;
 use	GuzzleHttp\Client as Client;
 use	Keboola\FacebookAdsExtractorBundle\FacebookAdsExtractorJob;
 use	Keboola\Code\Builder;
@@ -30,6 +31,16 @@ class FacebookAdsExtractor extends JsonExtractor
 	}
 
 	public function run(Config $config) {
+        if (isset($config->getAttributes()['api_version'])) {
+            $apiVersion = $config->getAttributes()['api_version'];
+            if (!preg_match("/^v(\d+).(\d+)$/", $apiVersion)) {
+                throw new UserException("The API version string '{$apiVersion}' is not valid");
+            }
+        } else {
+            $apiVersion = 'v2.4';
+        }
+
+
 		$apiVersion = isset($config->getAttributes()['api_version'])
 			? $config->getAttributes()['api_version']
 			: 'v2.4';
