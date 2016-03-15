@@ -260,7 +260,12 @@ class FacebookAdsExtractorJob extends JsonRecursiveJob
             }
 
             $message = $e->getData()['body']['error']['message'];
-            throw new UserException($message, $e, $e->getData());
+            $data = (array) $e->getData();
+            if ($e->getPrevious() instanceof \GuzzleHttp\Exception\ClientException) {
+                $data['request'] = (string) $e->getPrevious()->getRequest();
+            }
+
+            throw new UserException($message, $e, $data);
         }
 	}
 }
