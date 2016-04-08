@@ -37,13 +37,13 @@ class FacebookAdsExtractor extends JsonExtractor
                 throw new UserException("The API version string '{$apiVersion}' is not valid");
             }
         } else {
-            $apiVersion = 'v2.4';
+            $apiVersion = 'v2.5';
         }
 
 
 		$apiVersion = isset($config->getAttributes()['api_version'])
 			? $config->getAttributes()['api_version']
-			: 'v2.4';
+			: 'v2.5';
 
 		$client = new Client(
 			[
