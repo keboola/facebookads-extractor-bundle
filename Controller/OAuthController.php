@@ -27,6 +27,12 @@ class OAuthController extends OAuth20Controller
 	 */
 	protected $tokenUrl = "";
 
+    public function preExecute(Request $request)
+    {
+        parent::preExecute($request);
+        Request::setTrustedProxies(array($request->server->get('REMOTE_ADDR')));
+    }
+
 	/**
 	 * Create OAuth 2.0 request code URL (use CODE "response type")
 	 * See (A) at @link http://www.ibm.com/developerworks/library/x-androidfacebookapi/fig03.jpg
