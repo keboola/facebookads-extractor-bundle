@@ -1,6 +1,9 @@
 FORMAT: 1A
 HOST: https://syrup.keboola.com/ex-fb-ads
 
+# DEPRECATED 
+Replaced by https://github.com/keboola/ex-facebook-graph-api
+
 # Facebook Ads Extractor configuration
 ---
 Uses [Ads Insights API v2.7](https://developers.facebook.com/docs/marketing-api/insights/v2.7)
